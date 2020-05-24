@@ -1,0 +1,81 @@
+---
+title: "Project (Naive bayes)"
+author: "Jaymeen Gandhi"
+date: "4/29/2020"
+output: html_document
+---
+
+##Predicting red hat business value - The miners
+
+## Kaggle score of 86.889
+
+```{r}
+require(tidyverse)
+```
+
+```{r}
+activity = read_csv("D:/Data Sci 2/Project resources/act_train.csv")
+people = read_csv("D:/Data Sci 2/Project resources/people.csv")
+test = read_csv("D:/Data Sci 2/Project resources/act_test.csv")
+```
+
+
+
+```{r}
+##Combining the activity data with the people data.
+maindata = activity %>% left_join(people , by =c('people_id'='people_id'))
+maindata
+```
+
+```{r}
+##Replacing the N/A values with negative 1.
+maindata1 = maindata %>% replace(is.na(.), -1)
+maindata1
+```
+
+```{r}
+## Converting the boolean values to numeric.
+maindata2 = maindata1  %>% mutate_if(is.logical,as.numeric)
+maindata2
+```
+-
+
+```{r}
+which(colnames(maindata2)=="outcome")
+```
+
+```{r}
+##Combining the test data with the people data.
+test = test %>% left_join(people , by = c('people_id' ='people_id'))
+
+
+```
+
+
+```{r}
+require(e1071)
+```
+
+
+
+```{r}
+##Creating the model
+model = naiveBayes(maindata2[,-15],as.factor(maindata2$outcome),laplace = 1)
+
+```
+
+```{r}
+##Predicted values
+predict = predict(model, newdata = test)
+```
+
+```{r}
+data.frame(predict)
+```
+
+```{r}
+output=as.data.frame(test$activity_id)
+output=output%>%mutate(activity_id=test$activity_id, outcome=predict)
+write.csv(output,file="KaggleSubmission12.csv",row.names=FALSE)
+```
+
